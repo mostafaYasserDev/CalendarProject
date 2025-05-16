@@ -18,7 +18,12 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://calendar-project.vercel.app/"],
+    origin: [
+      "https://calendar-project.vercel.app/",
+      "https://calendar-project-mostafa-yassers-projects.vercel.app/",
+      "https://calendar-project-git-main-mostafa-yassers-projects.vercel.app/",
+      "https://calendar-project-3tyvxukrr-mostafa-yassers-projects.vercel.app/",
+    ],
     credentials: true,
   })
 );
