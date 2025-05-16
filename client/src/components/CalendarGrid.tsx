@@ -160,10 +160,12 @@ const CalendarGrid: React.FC = () => {
             
             const className = getDayClassName(day, dayStr, specialDay);
             const style = getDayStyle(specialDay);
-            const tasksForDate = tasks.filter(task => {
-              const taskDate = new Date(task.date);
-              return taskDate.toDateString() === day.toDateString();
-            });
+            const tasksForDate = Array.isArray(tasks) 
+              ? tasks.filter(task => {
+                  const taskDate = new Date(task.date);
+                  return taskDate.toDateString() === day.toDateString();
+                })
+              : [];
 
             return (
               <div

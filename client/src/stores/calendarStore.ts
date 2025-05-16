@@ -77,7 +77,7 @@ interface CalendarState {
   deleteCategory: (id: string) => Promise<void>;
 }
 
-const API_URL = "calendarproject-production.up.railway.app/api";
+const API_URL = "https://calendarproject-production.up.railway.app/api";
 
 export const useCalendarStore = create<CalendarState>()(
   persist(
@@ -95,11 +95,25 @@ export const useCalendarStore = create<CalendarState>()(
 
       loadTasks: async () => {
         try {
-          const response = await axios.get(`${API_URL}/tasks`);
-          set({ tasks: response.data });
+          set({ isLoading: true, error: null });
+          const token = localStorage.getItem("token");
+          const response = await fetch(`${API_URL}/tasks`, {
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to load tasks");
+          }
+
+          const data = await response.json();
+          const tasks = Array.isArray(data) ? data : [];
+          set({ tasks, isLoading: false });
         } catch (error) {
           console.error("Load tasks error:", error);
-          set({ tasks: [] });
+          set({ tasks: [], error: "Failed to load tasks", isLoading: false });
         }
       },
 
@@ -328,6 +342,10 @@ export const useCalendarStore = create<CalendarState>()(
 
       getTasksForDate: (dateStr) => {
         const state = get();
+        if (!Array.isArray(state.tasks)) {
+          console.warn('Tasks is not an array:', state.tasks);
+          return [];
+        }
         return state.tasks.filter((task) => {
           const taskDate = startOfDay(parseISO(task.date));
           const targetDate = startOfDay(parseISO(dateStr));
@@ -337,6 +355,10 @@ export const useCalendarStore = create<CalendarState>()(
 
       hasTasksOnDate: (dateStr) => {
         const state = get();
+        if (!Array.isArray(state.tasks)) {
+          console.warn('Tasks is not an array:', state.tasks);
+          return false;
+        }
         return state.tasks.some((task) => {
           const taskDate = startOfDay(parseISO(task.date));
           const targetDate = startOfDay(parseISO(dateStr));

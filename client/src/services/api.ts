@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "calendarproject-production.up.railway.app/api";
+const API_URL = "https://calendarproject-production.up.railway.app/api";
 
 const api = axios.create({
   baseURL: API_URL,
