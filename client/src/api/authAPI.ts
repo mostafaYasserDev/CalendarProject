@@ -3,7 +3,7 @@ import { User } from "../types/user";
 
 const API_URL =
   process.env.REACT_APP_API_URL ||
-  "calendarproject-production.up.railway.app/api";
+  "https://calendarproject-production-a8d8.up.railway.app/api";
 
 export const authAPI = {
   login: async (email: string, password: string) => {

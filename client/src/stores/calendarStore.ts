@@ -77,25 +77,7 @@ interface CalendarState {
   deleteCategory: (id: string) => Promise<void>;
 }
 
-const API_URL = "https://calendarproject-production.up.railway.app/api";
-
-// Create axios instance with default config
-const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  }
-});
-
-// Add request interceptor
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+const API_URL = "https://calendarproject-production-a8d8.up.railway.app/api";
 
 export const useCalendarStore = create<CalendarState>()(
   persist(
@@ -113,22 +95,33 @@ export const useCalendarStore = create<CalendarState>()(
 
       loadTasks: async () => {
         try {
-          set({ isLoading: true, error: null });
-          const response = await api.get('/tasks');
-          const tasks = Array.isArray(response.data) ? response.data : [];
-          set({ tasks, isLoading: false });
+          const response = await axios.get(`${API_URL}/tasks`);
+          set({ tasks: response.data });
         } catch (error) {
           console.error("Load tasks error:", error);
-          set({ tasks: [], error: "Failed to load tasks", isLoading: false });
+          set({ tasks: [] });
         }
       },
 
       loadSpecialDays: async () => {
         try {
           set({ isLoading: true, error: null });
+          const token = localStorage.getItem("token");
+
           await get().loadCategories();
-          const response = await api.get('/special-days');
-          const specialDays = response.data;
+
+          const response = await fetch(`${API_URL}/special-days`, {
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to load special days");
+          }
+
+          const specialDays = await response.json();
 
           const updatedSpecialDays = specialDays.map((day: SpecialDay) => {
             const category = get().categories.find(
@@ -154,21 +147,18 @@ export const useCalendarStore = create<CalendarState>()(
         }
       },
 
-      loadCategories: async () => {
-        try {
-          set({ isLoading: true, error: null });
-          const response = await api.get('/categories');
-          set({ categories: response.data, isLoading: false });
-        } catch (error) {
-          console.error("Load categories error:", error);
-          set({ categories: [], error: "Failed to load categories", isLoading: false });
-        }
-      },
-
       addTask: async (task) => {
         try {
           set({ isLoading: true, error: null });
-          const response = await api.post('/tasks', task);
+          const token = localStorage.getItem("token");
+          if (!token) {
+            throw new Error("Not authenticated");
+          }
+          const response = await axios.post(`${API_URL}/tasks`, task, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
           set((state) => ({
             tasks: [...state.tasks, response.data],
             isLoading: false,
@@ -183,7 +173,19 @@ export const useCalendarStore = create<CalendarState>()(
       updateTask: async (taskId, updates) => {
         try {
           set({ isLoading: true, error: null });
-          const response = await api.put(`/tasks/${taskId}`, updates);
+          const token = localStorage.getItem("token");
+          if (!token) {
+            throw new Error("Not authenticated");
+          }
+          const response = await axios.put(
+            `${API_URL}/tasks/${taskId}`,
+            updates,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
           set((state) => ({
             tasks: state.tasks.map((task) =>
               task._id === taskId ? response.data : task
@@ -200,7 +202,15 @@ export const useCalendarStore = create<CalendarState>()(
       deleteTask: async (taskId) => {
         try {
           set({ isLoading: true, error: null });
-          await api.delete(`/tasks/${taskId}`);
+          const token = localStorage.getItem("token");
+          if (!token) {
+            throw new Error("Not authenticated");
+          }
+          await axios.delete(`${API_URL}/tasks/${taskId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
           set((state) => ({
             tasks: state.tasks.filter((task) => task._id !== taskId),
             isLoading: false,
@@ -214,12 +224,31 @@ export const useCalendarStore = create<CalendarState>()(
 
       addSpecialDay: async (specialDay) => {
         try {
-          const response = await api.post('/special-days', {
-            ...specialDay,
-            category: specialDay.category?._id,
+          set({ isLoading: true, error: null });
+          const token = localStorage.getItem("token");
+          if (!token) {
+            throw new Error("Not authenticated");
+          }
+
+          const response = await fetch(`${API_URL}/special-days`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              ...specialDay,
+              category: specialDay.category?._id,
+            }),
           });
+
+          if (!response.ok) {
+            throw new Error("Failed to add special day");
+          }
+
+          const newSpecialDay = await response.json();
           set((state) => ({
-            specialDays: [...state.specialDays, response.data],
+            specialDays: [...state.specialDays, newSpecialDay],
             isLoading: false,
           }));
         } catch (error) {
@@ -231,13 +260,32 @@ export const useCalendarStore = create<CalendarState>()(
 
       updateSpecialDay: async (id, updates) => {
         try {
-          const response = await api.put(`/special-days/${id}`, {
-            ...updates,
-            category: updates.category?._id,
+          set({ isLoading: true, error: null });
+          const token = localStorage.getItem("token");
+          if (!token) {
+            throw new Error("Not authenticated");
+          }
+
+          const response = await fetch(`${API_URL}/special-days/${id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              ...updates,
+              category: updates.category?._id,
+            }),
           });
+
+          if (!response.ok) {
+            throw new Error("Failed to update special day");
+          }
+
+          const updatedSpecialDay = await response.json();
           set((state) => ({
             specialDays: state.specialDays.map((day) =>
-              day._id === id ? response.data : day
+              day._id === id ? updatedSpecialDay : day
             ),
             isLoading: false,
           }));
@@ -250,7 +298,23 @@ export const useCalendarStore = create<CalendarState>()(
 
       deleteSpecialDay: async (id) => {
         try {
-          await api.delete(`/special-days/${id}`);
+          set({ isLoading: true, error: null });
+          const token = localStorage.getItem("token");
+          if (!token) {
+            throw new Error("Not authenticated");
+          }
+
+          const response = await fetch(`${API_URL}/special-days/${id}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to delete special day");
+          }
+
           set((state) => ({
             specialDays: state.specialDays.filter((day) => day._id !== id),
             isLoading: false,
@@ -264,10 +328,6 @@ export const useCalendarStore = create<CalendarState>()(
 
       getTasksForDate: (dateStr) => {
         const state = get();
-        if (!Array.isArray(state.tasks)) {
-          console.warn('Tasks is not an array:', state.tasks);
-          return [];
-        }
         return state.tasks.filter((task) => {
           const taskDate = startOfDay(parseISO(task.date));
           const targetDate = startOfDay(parseISO(dateStr));
@@ -277,10 +337,6 @@ export const useCalendarStore = create<CalendarState>()(
 
       hasTasksOnDate: (dateStr) => {
         const state = get();
-        if (!Array.isArray(state.tasks)) {
-          console.warn('Tasks is not an array:', state.tasks);
-          return false;
-        }
         return state.tasks.some((task) => {
           const taskDate = startOfDay(parseISO(task.date));
           const targetDate = startOfDay(parseISO(dateStr));
@@ -298,13 +354,57 @@ export const useCalendarStore = create<CalendarState>()(
         });
       },
 
+      loadCategories: async () => {
+        try {
+          set({ isLoading: true, error: null });
+          const token = localStorage.getItem("token");
+          const response = await fetch(`${API_URL}/categories`, {
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to load categories");
+          }
+
+          const categories = await response.json();
+          set({ categories, isLoading: false });
+        } catch (error) {
+          console.error("Load categories error:", error);
+          set({ error: "Failed to load categories", isLoading: false });
+          throw error;
+        }
+      },
+
       addCategory: async (category) => {
         try {
-          const response = await api.post('/categories', category);
+          set({ isLoading: true, error: null });
+          const token = localStorage.getItem("token");
+          if (!token) {
+            throw new Error("Not authenticated");
+          }
+
+          const response = await fetch(`${API_URL}/categories`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(category),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to add category");
+          }
+
+          const newCategory = await response.json();
           set((state) => ({
-            categories: [...state.categories, response.data],
+            categories: [...state.categories, newCategory],
             isLoading: false,
           }));
+
           await get().loadSpecialDays();
         } catch (error) {
           console.error("Add category error:", error);
@@ -315,13 +415,33 @@ export const useCalendarStore = create<CalendarState>()(
 
       updateCategory: async (id, updates) => {
         try {
-          const response = await api.put(`/categories/${id}`, updates);
+          set({ isLoading: true, error: null });
+          const token = localStorage.getItem("token");
+          if (!token) {
+            throw new Error("Not authenticated");
+          }
+
+          const response = await fetch(`${API_URL}/categories/${id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(updates),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to update category");
+          }
+
+          const updatedCategory = await response.json();
           set((state) => ({
             categories: state.categories.map((cat) =>
-              cat._id === id ? response.data : cat
+              cat._id === id ? updatedCategory : cat
             ),
             isLoading: false,
           }));
+
           await get().loadSpecialDays();
         } catch (error) {
           console.error("Update category error:", error);
@@ -332,11 +452,28 @@ export const useCalendarStore = create<CalendarState>()(
 
       deleteCategory: async (id) => {
         try {
-          await api.delete(`/categories/${id}`);
+          set({ isLoading: true, error: null });
+          const token = localStorage.getItem("token");
+          if (!token) {
+            throw new Error("Not authenticated");
+          }
+
+          const response = await fetch(`${API_URL}/categories/${id}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to delete category");
+          }
+
           set((state) => ({
             categories: state.categories.filter((cat) => cat._id !== id),
             isLoading: false,
           }));
+
           await get().loadSpecialDays();
         } catch (error) {
           console.error("Delete category error:", error);

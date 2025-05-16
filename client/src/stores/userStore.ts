@@ -31,7 +31,7 @@ interface UserState {
   deleteUser: (id: string) => Promise<void>;
 }
 
-const API_URL = "calendarproject-production.up.railway.app/api";
+const API_URL = "https://calendarproject-production-a8d8.up.railway.app/api";
 
 export const useUserStore = create<UserState>()(
   persist(

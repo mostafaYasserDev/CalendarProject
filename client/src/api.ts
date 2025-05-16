@@ -1,7 +1,9 @@
 import axios from "axios";
 
-export const API_URL = "https://calendarproject-production.up.railway.app/api";
+export const API_URL =
+  "https://calendarproject-production-a8d8.up.railway.app/api";
 
+// إعداد الإعتراض للطلبات
 axios.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -15,6 +17,7 @@ axios.interceptors.request.use(
   }
 );
 
+// إعداد الإعتراض للاستجابات
 axios.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -37,3 +40,4 @@ export const getUsers = async () => {
   }
 };
 
+// ... باقي الدوال
