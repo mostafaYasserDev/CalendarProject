@@ -1,16 +1,23 @@
-import axios from 'axios';
-import { User } from '../types/user';
+import axios from "axios";
+import { User } from "../types/user";
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL =
+  process.env.REACT_APP_API_URL ||
+  "calendarproject-production.up.railway.app/api";
 
 export const authAPI = {
   login: async (email: string, password: string) => {
-    const response = await axios.post(`${API_URL}/auth/login`, { email, password });
+    const response = await axios.post(`${API_URL}/auth/login`, {
+      email,
+      password,
+    });
     return response.data;
   },
 
   localLogin: async (systemUsername: string) => {
-    const response = await axios.post(`${API_URL}/auth/local-login`, { systemUsername });
+    const response = await axios.post(`${API_URL}/auth/local-login`, {
+      systemUsername,
+    });
     return response.data;
   },
 
@@ -24,10 +31,10 @@ export const authAPI = {
     return response.data;
   },
 
-  createUser: async (userData: { 
-    name: string; 
-    email: string; 
-    password: string; 
+  createUser: async (userData: {
+    name: string;
+    email: string;
+    password: string;
     role?: string;
     systemUsername?: string;
   }) => {
@@ -50,6 +57,9 @@ export const authAPI = {
   },
 
   changePassword: async (currentPassword: string, newPassword: string) => {
-    await axios.post(`${API_URL}/auth/change-password`, { currentPassword, newPassword });
-  }
-}; 
+    await axios.post(`${API_URL}/auth/change-password`, {
+      currentPassword,
+      newPassword,
+    });
+  },
+};
