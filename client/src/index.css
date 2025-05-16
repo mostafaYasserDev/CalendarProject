@@ -1,0 +1,95 @@
+@import "@fontsource/rubik/300.css";
+@import "@fontsource/rubik/400.css";
+@import "@fontsource/rubik/500.css";
+@import "@fontsource/rubik/700.css";
+@import "@fontsource/lalezar/400.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: "Rubik", sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Lalezar", cursive;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 font-rubik;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50;
+  }
+
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary-500 text-white hover:bg-secondary-600 focus:ring-secondary-400;
+  }
+
+  .btn-outline {
+    @apply border border-gray-300 bg-white hover:bg-gray-50 focus:ring-gray-300;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-md overflow-hidden;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+
+  .calendar-day {
+    @apply h-14 md:h-24 w-full border border-gray-200 p-1 md:p-2 transition-colors duration-200 relative;
+  }
+
+  .calendar-day-current-month {
+    @apply bg-white hover:bg-gray-50;
+  }
+
+  .calendar-day-other-month {
+    @apply bg-gray-100 text-gray-400;
+  }
+
+  .calendar-day-today {
+    @apply bg-primary-50 font-bold;
+  }
+
+
+  .calendar-day-special {
+    @apply bg-secondary-50 border-secondary-300;
+  }
+
+  .modal-backdrop {
+    @apply fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4 transition-opacity;
+  }
+
+  .modal-content {
+    @apply bg-white rounded-lg shadow-xl overflow-auto max-w-md w-full max-h-[90vh] animate-scale-in;
+  }
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: black;
+}
