@@ -21,7 +21,7 @@ const Layout: React.FC = () => {
           <h1 className="text-2xl font-lalezar flex justify-between items-center">
             CRISOD
             <img
-              src="./../../logo.png"
+              src="./../../public/logo.png"
               alt="industrial security logo"
               className="logo"
             />
