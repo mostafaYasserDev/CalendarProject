@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, Navigate } from "react-router-dom";
 import { LayoutDashboard, LogOut } from "lucide-react";
 import { useAuthStore } from "../stores/authStore";
 import UserMenu from "./UserMenu";
-import LocalAdminButton from './LocalAdminButton';
+import LocalAdminButton from "./LocalAdminButton";
 
 const Layout: React.FC = () => {
   const location = useLocation();
