@@ -4,7 +4,6 @@ import { LayoutDashboard, LogOut } from "lucide-react";
 import { useAuthStore } from "../stores/authStore";
 import UserMenu from "./UserMenu";
 import LocalAdminButton from "./LocalAdminButton";
-
 const Layout: React.FC = () => {
   const location = useLocation();
   const { isAuthenticated, logout } = useAuthStore();
@@ -21,7 +20,7 @@ const Layout: React.FC = () => {
           <h1 className="text-2xl font-lalezar flex justify-between items-center">
             CRISOD
             <img
-              src="./../../public/logo.png"
+              src="/logo.png"
               alt="industrial security logo"
               className="logo"
             />
